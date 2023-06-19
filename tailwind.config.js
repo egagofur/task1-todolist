@@ -12,9 +12,11 @@ export default {
         primary: "#2F84FE",
         warning: "#FFE8C8",
         danger: "#F8B6BF",
+        form: "#EFF3F4",
+        text: "#5E5F63",
       },
     },
   },
   // eslint-disable-next-line no-undef
-  plugins: [require("@tailwindcss/forms")],
+  plugins: [require("@tailwindcss/forms"), require("tailwind-scrollbar-hide")],
 };
