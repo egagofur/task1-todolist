@@ -2,7 +2,7 @@ import ProfileImage from "./assets/profile.png";
 
 function App() {
   return (
-    <main className="max-w-2xl min-h-screen mx-auto bg-bgDark">
+    <main className="relative max-w-2xl min-h-screen mx-auto bg-bgDark">
       <div className="p-8">
         <header>
           <div className="flex items-center">
@@ -74,10 +74,11 @@ function App() {
             </div>
           </div>
         </section>
-
-        <div className="">
-          <button className="bg-">+ Create New</button>
-        </div>
+      </div>
+      <div className="absolute bottom-0 w-full p-8">
+        <button className="w-full py-4 text-xl font-semibold text-gray-100 border rounded-xl font-jakartaPlus bg-primary hover:bg-primary/75">
+          <span className="mr-4 text-2xl">+</span> Create New
+        </button>
       </div>
     </main>
   );
