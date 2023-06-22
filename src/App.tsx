@@ -1,24 +1,16 @@
 import { SyntheticEvent, useCallback, useEffect, useState } from "react";
 import moment from "moment";
 import axios from "axios";
+import { ITask } from "./helpers/ITask";
 
 import Header from "./components/Header";
-
-export interface Task {
-  id: number;
-  title: string;
-  desc: string;
-  done: boolean;
-  date: string;
-  time: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { toast, Toaster } from "react-hot-toast";
+import { useFilterLength } from "./helpers/useFilterLength";
 
 function App() {
   const [showModal, setShowModal] = useState(false);
   const [tasks, setTasks] = useState([]);
-  const [update, setUpdate] = useState([] as Task[]);
+  const [update, setUpdate] = useState([] as ITask[]);
   const [form, setForm] = useState({
     title: "",
     desc: "",
@@ -27,17 +19,16 @@ function App() {
     time: "",
   });
 
-  const unfinishedTasks = tasks.filter((task: Task) => task.done === false);
-  const lengthOfUnfinishedTasks = unfinishedTasks.length;
-
   const getData = useCallback(async () => {
     const req = await axios.get("http://localhost:4000/api/todos");
     setTasks(req.data.data);
   }, []);
 
-  useEffect(() => {
-    getData();
-  }, [getData]);
+  // filter length task
+  const {
+    lengthOfUnfinishedTasks: lengthUnfinished,
+    lengthOfFinishedTasks: lengthFinished,
+  } = useFilterLength(tasks);
 
   // handle modal
   const handleModal = () => {
@@ -53,13 +44,16 @@ function App() {
     }
   };
 
-  const handleChecked = async (id: number, payload: Task) => {
+  // handle checked
+  const handleChecked = async (id: number, payload: ITask) => {
     await axios.patch(`http://localhost:4000/api/todos/${id}`, {
       done: !payload.done,
     });
+    toast.success("Task Updated");
     getData();
   };
 
+  // handle submit
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
 
@@ -70,17 +64,20 @@ function App() {
         date: form.date,
         time: form.time,
       });
+      toast.success("Success Update Task");
       setUpdate([]);
       getData();
       return handleModal();
     }
+
     await axios.post("http://localhost:4000/api/todos", {
       title: form.title,
       desc: form.desc,
-      done: form.done,
       date: form.date,
       time: form.time,
     });
+    toast.success("Success Add New Task");
+
     handleModal();
     setForm({
       title: "",
@@ -94,37 +91,40 @@ function App() {
 
   const handleDelete = async (id: number) => {
     await axios.delete(`http://localhost:4000/api/todos/${id}`);
+    toast.error("Task Deleted");
     getData();
   };
 
   const handleUpdate = async (id: number) => {
-    const updateData = tasks.filter((task: Task) => task.id === id);
+    const updateData = tasks.filter((task: ITask) => task.id === id);
     setUpdate(updateData);
     handleModal();
   };
 
   useEffect(() => {
-    return setForm(update[0]);
-  }, [update]);
+    getData();
+    setForm(update[0]);
+  }, [update, getData]);
 
   return (
     <main className="relative h-screen max-w-2xl mx-auto overflow-x-hidden scrollbar-hide bg-bgDark">
       <div className="p-8">
         <Header />
+        <Toaster />
         <section className="">
           <div className="mt-4">
             <h3 className="pb-2 text-xl font-bold text-gray-700 font-jakartaPlus">
               On Progress
               <span className="ml-2 font-normal text-gray-500">
-                ( {lengthOfUnfinishedTasks} )
+                ( {lengthUnfinished} )
               </span>
             </h3>
 
             <div className="overflow-y-scroll max-h-80 scrollbar-hide">
               {tasks.length > 0 &&
                 tasks
-                  .filter((task: Task) => task.done === false)
-                  .map((task: Task) => (
+                  .filter((task: ITask) => task.done === false)
+                  .map((task: ITask) => (
                     <div
                       key={task.id}
                       className="flex items-center justify-between p-4 mt-4 bg-white border-l-8 rounded-lg shadow-sm border-warning"
@@ -169,15 +169,18 @@ function App() {
           <div className="mt-4">
             <h3 className="pb-2 text-xl font-bold text-gray-700 font-jakartaPlus">
               Complated
+              <span className="ml-2 font-normal text-gray-500">
+                ( {lengthFinished} )
+              </span>
             </h3>
             <div className="overflow-y-scroll max-h-80 scrollbar-hide">
               {tasks.length > 0 &&
                 tasks
-                  .filter((task: Task) => task.done === true)
-                  .map((task: Task) => (
+                  .filter((task: ITask) => task.done === true)
+                  .map((task: ITask) => (
                     <div
                       key={task.id}
-                      className="flex items-center justify-between p-4 mt-4 bg-white border-l-8 rounded-lg shadow-sm border-danger"
+                      className="flex items-center justify-between p-4 mt-4 line-through bg-white border-l-8 rounded-lg shadow-sm border-danger"
                     >
                       <button
                         className="w-full text-left"
@@ -185,7 +188,7 @@ function App() {
                       >
                         <div className="flex flex-col max-w-xs md:max-w-lg font-jakartaPlus">
                           <div className="mb-4 space-y-2">
-                            <h4 className="text-base font-bold text-gray-700 line-through">
+                            <h4 className="text-base font-bold text-gray-700">
                               {task.title}
                             </h4>
                             <p className="text-sm font-medium text-gray-400">
