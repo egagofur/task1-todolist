@@ -111,7 +111,7 @@ function App() {
       <div className="p-8">
         <Header />
         <Toaster />
-        <section className="">
+        <section>
           <div className="mt-4">
             <h3 className="pb-2 text-xl font-bold text-gray-700 font-jakartaPlus">
               On Progress
