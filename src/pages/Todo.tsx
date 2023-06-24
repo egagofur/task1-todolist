@@ -13,7 +13,6 @@ import CardNotComplate from "../components/CardNotComplate";
 function Todo() {
   const [showModal, setShowModal] = useState(false);
   const [tasks, setTasks] = useState([]);
-  console.log(tasks);
 
   const [update, setUpdate] = useState([] as ITask[]);
   const [form, setForm] = useState({
